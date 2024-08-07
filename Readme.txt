@@ -21,8 +21,12 @@ sudo composer install
 
 Create the .env File
 
-DB_HOST=your_postgresql_host
+DB_HOST=tom-psqlserver.postgres.database.azure.com
 DB_PORT=5432
 DB_NAME=mydb
-DB_USER=your_pgsql_username
-DB_PASS=your_pgsql_password
+DB_USER=psqladmin@tom-psqlserver
+DB_PASS=H@Sh1CoR3!
+
+
+PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql
+
