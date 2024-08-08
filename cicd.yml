@@ -1,0 +1,23 @@
+trigger:
+  branches:
+    include:
+      - main  # or your preferred branch
+
+pool:
+  vmImage: 'ubuntu-latest'  # You can also specify windows-latest if required
+
+steps:
+- script: |
+    << EOF
+      cd /home/adminuser
+      rm -rf *
+      git pull https://github.com/Ganesh-DevOps-Eng/php-postgres.git
+      cd php-postgres/
+      mv * /var/www/html
+      sudo chown www-data:www-data /var/www/html/*
+      sudo chmod 644 /var/www/html/*
+      sudo composer require vlucas/phpdotenv -y
+      sudo composer install -y
+      sudo systemctl restart apache2
+    EOF
+  displayName: 'Deploy to VM'
