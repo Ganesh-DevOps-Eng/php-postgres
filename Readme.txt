@@ -30,3 +30,23 @@ DB_PASS=H@Sh1CoR3!
 
 PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql
 
+# loadblance unhealthy soluation 
+sudo vim /var/www/html/.htaccess
+
+RewriteEngine On
+RewriteRule ^health$ health.php [L]
+
+# update file 
+sudo nano /etc/apache2/sites-available/000-default.conf
+
+<Directory /var/www/html>
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Require all granted
+</Directory>
+
+sudo systemctl restart apache2
+
+
+
+
