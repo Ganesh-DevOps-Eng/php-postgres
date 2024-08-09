@@ -39,8 +39,9 @@ sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
 EOT'
 
 # Install Composer dependencies
-sudo composer require vlucas/phpdotenv -y
-sudo composer install -y
+yes | sudo composer require vlucas/phpdotenv
+yes | sudo composer install
 
 # Restart Apache
+sudo a2enmod rewrite
 sudo systemctl restart apache2
