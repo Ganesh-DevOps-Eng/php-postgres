@@ -22,13 +22,12 @@ PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psql
 
 # Move files to web root
 mv * /var/www/html
-sudo chown www-data:www-data /var/www/html/*
-sudo chmod 644 /var/www/html/*
 
 # Configure Apache
 echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess
 echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess
-
+sudo chown www-data:www-data /var/www/html/*
+sudo chmod 644 /var/www/html/*
 # Update Apache configuration to allow overrides
 sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
 <Directory /var/www/html>
