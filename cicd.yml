@@ -4,7 +4,8 @@ trigger:
       - main  # or your preferred branch
 
 pool:
-  vmImage: 'ubuntu-latest'  # You can also specify windows-latest if required
+  #vmImage: 'ubuntu-latest'  # You can also specify windows-latest if required
+  name: 'devops-vmss'
 
 # Initial setup (Run once)
 steps:
