@@ -56,22 +56,6 @@ fi
 
 # Restart Apache
 sudo chown -R www-data:www-data /home/adminuser/project/vendor
-
-The permissions for your project directory are generally set correctly, but there are a few inconsistencies that you may want to address:
-
-Inconsistencies:
-composer.json and composer.lock Files:
-
-These files are owned by root, while the rest of the files are owned by www-data.
-It's recommended that all files in the project directory be owned by the same user, typically www-data, if Apache is serving the files.
-Permissions on vendor Directory:
-
-The vendor directory is owned by root. This should ideally be owned by www-data if the web server needs to write or execute files within this directory.
-Suggested Commands to Correct Permissions:
-To fix the ownership inconsistencies, you can run the following commands:
-
-bash
-Copy code
 # Change ownership of composer files to www-data
 sudo chown www-data:www-data /home/adminuser/project/composer.json
 sudo chown www-data:www-data /home/adminuser/project/composer.lock
