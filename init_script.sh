@@ -35,6 +35,7 @@ echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess
 sudo chown -R www-data:www-data /home/adminuser/project/ || true
 sudo chmod -R 755 /home/adminuser/project/ || true
 sudo chmod 644 /home/adminuser/project/.env || true
+sudo chmod 644 /var/www/html/.htaccess || true
 sudo rm -rf /var/www/html/index.html || true
 # Update Apache configuration to allow overrides
 sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
