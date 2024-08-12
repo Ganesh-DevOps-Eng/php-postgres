@@ -35,12 +35,12 @@ steps:
 
     # Update Apache configuration to allow overrides
     sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
-<Directory /var/www/html>
-    Options Indexes FollowSymLinks
-    AllowOverride All
-    Require all granted
-</Directory>
-EOT'
+    <Directory /var/www/html>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    EOT'
 
     # Mark setup as completed (create a file to indicate setup has been done)
     sudo touch /home/adminuser/.setup_done
