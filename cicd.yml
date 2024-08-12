@@ -60,6 +60,6 @@ steps:
     yes | sudo composer require vlucas/phpdotenv
     yes | sudo composer install
 
-    # Restart Apache
+    # Restart Apache 
     sudo systemctl restart apache2
   displayName: 'Deploy to VM'
