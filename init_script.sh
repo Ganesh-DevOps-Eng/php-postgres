@@ -1,14 +1,6 @@
 #!/bin/bash
 
 set -e  # Exit immediately if a command exits with a non-zero status
-
-# Create and run composer.sh script
-echo "#!/bin/bash" | sudo tee /root/composer.sh
-echo "curl -sS https://getcomposer.org/installer | php" | sudo tee -a /root/composer.sh
-echo "sudo mv composer.phar /usr/local/bin/composer" | sudo tee -a /root/composer.sh
-sudo chmod +x /root/composer.sh
-sudo sh /root/composer.sh
-
 # Update and install packages
 sudo apt update -y || true
 sudo apt install apache2 -y || true
