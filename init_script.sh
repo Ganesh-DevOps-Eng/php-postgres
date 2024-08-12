@@ -3,42 +3,47 @@
 set -e  # Exit immediately if a command exits with a non-zero status
 
 # Update and install packages
-sudo apt update -y
-sudo apt install apache2 -y
-sudo apt install postgresql-client -y
-sudo apt install php libapache2-mod-php php-pgsql -y
-sudo apt install curl php-cli php-mbstring unzip -y
+sudo apt update -y || true
+sudo apt install apache2 -y || true
+sudo apt install postgresql-client -y || true
+sudo apt install php libapache2-mod-php php-pgsql -y || true
+sudo apt install curl php-cli php-mbstring unzip -y || true
 
-# Install Composer
-curl -sS https://getcomposer.org/installer | php
-sudo mv composer.phar /usr/local/bin/composer
+# Function to install Composer
+install_composer() {
+  echo "Installing Composer..."
+  curl -sS https://getcomposer.org/installer | php || true
+  sudo mv composer.phar /usr/local/bin/composer || true
+}
+
+# Ensure Composer is installed
+if ! command -v composer &> /dev/null; then
+  install_composer
+fi
 
 # Clone the repository and setup application
-mkdir -p /home/adminuser/project
-cd /home/adminuser/project
-git init
-git pull https://github.com/Ganesh-DevOps-Eng/php-postgres.git
-
+mkdir -p /home/adminuser/project || true
+cd /home/adminuser/project || true
+git init || true
+git pull https://github.com/Ganesh-DevOps-Eng/php-postgres.git || true
 
 # Import database if it doesn't already exist
 DB_EXISTS=$(PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='mydb'")
 if [ -z "$DB_EXISTS" ]; then
-  echo "Database does not exist. Restoring..."
-  PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql
-else
-  echo "Database already exists. Skipping restore."
+  PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql || true
 fi
 
-sudo ln -s /home/adminuser/project /var/www/html/
+# Create a symbolic link
+sudo ln -s /home/adminuser/project /var/www/html/ || true
 
 # Configure Apache
-echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess
-echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess
+echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess || true
+echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess || true
 
 # Set proper permissions
-sudo chown -R www-data:www-data /home/adminuser/project/
-sudo chmod -R 755 /home/adminuser/project/
-sudo chmod 644 /home/adminuser/project/.env
+sudo chown -R www-data:www-data /home/adminuser/project/ || true
+sudo chmod -R 755 /home/adminuser/project/ || true
+sudo chmod 644 /home/adminuser/project/.env || true
 
 # Update Apache configuration to allow overrides
 sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
@@ -46,12 +51,12 @@ sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
     Options Indexes FollowSymLinks
     AllowOverride All
     Require all granted
-</Directory>'
-  
+</Directory>' || true
+
 # Install Composer dependencies
-yes | sudo composer require vlucas/phpdotenv
-yes | sudo composer install
+yes | sudo composer require vlucas/phpdotenv || true
+yes | sudo composer install || true
 
 # Restart Apache
-sudo a2enmod rewrite
-sudo systemctl restart apache2
+sudo a2enmod rewrite || true
+sudo systemctl restart apache2 || true
