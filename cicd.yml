@@ -45,7 +45,7 @@ steps:
     # Mark setup as completed (create a file to indicate setup has been done)
     sudo touch /home/adminuser/.setup_done
   displayName: 'Initial Setup (Run Once)'
-  condition: and(succeeded(), not(exists('/home/adminuser/.setup_done')))
+  condition: and(succeeded(), not(contains(variables['Build.SourceBranch'], 'refs/heads/main')))
 
 # Code deployment (Run on every commit)
 - script: |
@@ -58,6 +58,6 @@ steps:
     yes | sudo composer require vlucas/phpdotenv
     yes | sudo composer install
 
-    # Restart Apache 
+    # Restart Apache
     sudo systemctl restart apache2
   displayName: 'Deploy to VM'
