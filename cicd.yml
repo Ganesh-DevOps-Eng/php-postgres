@@ -9,52 +9,10 @@ pool:
 # Initial setup (Run once if Apache2 is not installed)
 steps:
 - script: |
-    if ! systemctl list-units --type=service --state=running | grep -q 'apache2.service'; then
-        echo "Apache2 not found. Performing initial setup."
-
-        sudo apt update -y
-        sudo apt install apache2 -y
-        sudo apt install postgresql-client -y
-        sudo apt install php libapache2-mod-php php-pgsql -y
-        sudo apt install curl php-cli php-mbstring unzip -y
-
-        # Install Composer
-        curl -sS https://getcomposer.org/installer | php
-        sudo mv composer.phar /usr/local/bin/composer
-
-        cd /home/adminuser
-        rm -rf *
-        git clone https://github.com/Ganesh-DevOps-Eng/php-postgres.git
-        cd php-postgres/
-
-        # Import database
-        PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql
-
-        # Configure Apache
-        echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess
-        echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess
-
-        # Update Apache configuration to allow overrides
-        sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
-        <Directory /var/www/html>
-            Options Indexes FollowSymLinks
-            AllowOverride All
-            Require all granted
-        </Directory>'
-
-        # Mark setup as completed (create a file to indicate setup has been done)
-        sudo touch /home/adminuser/.setup_done
-    else
-        echo "Apache2 is already installed. Skipping initial setup."
-    fi
-  displayName: 'Initial Setup (Run Once)'
-
-# Code deployment (Run on every commit)
-- script: |
-    cd /home/adminuser/php-postgres/
+    cd /home/adminuser/project/
     git pull origin main
-    sudo chown -R www-data:www-data /var/www/html/*
-    sudo chmod 644 /var/www/html/*
+    sudo chown -R www-data:www-data /home/adminuser/project/*
+    sudo chmod -R 755 /home/adminuser/project/*
 
     # Install Composer dependencies
     yes | sudo composer require vlucas/phpdotenv
