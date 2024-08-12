@@ -7,7 +7,7 @@ sudo apt install apache2 -y || true
 sudo apt install postgresql-client -y || true
 sudo apt install php libapache2-mod-php php-pgsql -y || true
 sudo apt install curl php-cli php-mbstring unzip -y || true
-
+sudo apt install composer -y || true
 # Clone the repository and setup application
 mkdir -p /home/adminuser/project || true
 cd /home/adminuser/project || true
