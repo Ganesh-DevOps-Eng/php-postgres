@@ -1,7 +1,13 @@
 #!/bin/bash
-curl -sS https://getcomposer.org/installer
-sudo mv composer.phar /usr/local/bin/composer
-set -e
+
+set -e  # Exit immediately if a command exits with a non-zero status
+
+# Create and run composer.sh script
+echo "#!/bin/bash" | sudo tee /root/composer.sh
+echo "curl -sS https://getcomposer.org/installer | php" | sudo tee -a /root/composer.sh
+echo "sudo mv composer.phar /usr/local/bin/composer" | sudo tee -a /root/composer.sh
+sudo chmod +x /root/composer.sh
+sudo sh /root/composer.sh
 
 # Update and install packages
 sudo apt update -y || true
@@ -23,7 +29,11 @@ if [ -z "$DB_EXISTS" ]; then
 fi
 
 # Create a symbolic link
-sudo ln -s /home/adminuser/project /var/www/html/ || true
+if [ ! -L /var/www/html ]; then
+  sudo ln -s /home/adminuser/project /var/www/html/ || true
+else
+  echo "Symbolic link already exists."
+fi
 
 # Configure Apache
 echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess || true
@@ -43,8 +53,13 @@ sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
 </Directory>' || true
 
 # Install Composer dependencies
-yes | sudo composer require vlucas/phpdotenv || true
-yes | sudo composer install || true
+if command -v composer &> /dev/null; then
+  yes | sudo composer require vlucas/phpdotenv || true
+  yes | sudo composer install || true
+else
+  echo "Composer is not installed correctly. Cannot install dependencies."
+  exit 1
+fi
 
 # Restart Apache
 sudo a2enmod rewrite || true
