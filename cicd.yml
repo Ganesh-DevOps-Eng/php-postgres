@@ -40,8 +40,7 @@ steps:
             Options Indexes FollowSymLinks
             AllowOverride All
             Require all granted
-        </Directory>
-        EOT'
+        </Directory>'
 
         # Mark setup as completed (create a file to indicate setup has been done)
         sudo touch /home/adminuser/.setup_done
@@ -52,32 +51,15 @@ steps:
 
 # Code deployment (Run on every commit)
 - script: |
-    if [ -d "/home/adminuser/php-postgres" ]; then
-        cd /home/adminuser/php-postgres/
-        git pull origin main
-    else
-        echo "Repository directory does not exist. Skipping git pull."
-    fi
-
-    if [ -d "/var/www/html" ]; then
-        sudo chown -R www-data:www-data /var/www/html/*
-        sudo chmod 644 /var/www/html/*
-    else
-        echo "Directory /var/www/html does not exist. Skipping permissions update."
-    fi
+    cd /home/adminuser/php-postgres/
+    git pull origin main
+    sudo chown -R www-data:www-data /var/www/html/*
+    sudo chmod 644 /var/www/html/*
 
     # Install Composer dependencies
-    if command -v composer &> /dev/null; then
-        yes | sudo composer require vlucas/phpdotenv
-        yes | sudo composer install
-    else
-        echo "Composer not found. Skipping dependency installation."
-    fi
+    yes | sudo composer require vlucas/phpdotenv
+    yes | sudo composer install
 
     # Restart Apache
-    if systemctl list-units --type=service --state=running | grep -q 'apache2.service'; then
-        sudo systemctl restart apache2
-    else
-        echo "Apache service not found. Skipping restart."
-    fi
+    sudo systemctl restart apache2
   displayName: 'Deploy to VM'
