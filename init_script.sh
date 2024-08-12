@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e  # Exit immediately if a command exits with a non-zero status
+set -e
 
 # Update and install packages
 sudo apt update -y || true
@@ -12,13 +12,29 @@ sudo apt install curl php-cli php-mbstring unzip -y || true
 # Function to install Composer
 install_composer() {
   echo "Installing Composer..."
-  curl -sS https://getcomposer.org/installer | php || true
-  sudo mv composer.phar /usr/local/bin/composer || true
+  curl -sS https://getcomposer.org/installer | php || {
+    echo "Failed to download Composer"
+    exit 1
+  }
+  sudo mv composer.phar /usr/local/bin/composer || {
+    echo "Failed to move Composer to /usr/local/bin"
+    exit 1
+  }
+  sudo chmod +x /usr/local/bin/composer || {
+    echo "Failed to set executable permissions for Composer"
+    exit 1
+  }
 }
 
 # Ensure Composer is installed
 if ! command -v composer &> /dev/null; then
   install_composer
+fi
+
+# Verify Composer installation
+if ! command -v composer &> /dev/null; then
+  echo "Composer installation failed."
+  exit 1
 fi
 
 # Clone the repository and setup application
