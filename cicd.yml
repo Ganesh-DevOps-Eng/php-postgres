@@ -6,58 +6,78 @@ trigger:
 pool:
   name: 'devops-vmss'
 
-# Initial setup (Run once)
+# Initial setup (Run once if Apache2 is not installed)
 steps:
 - script: |
-    sudo apt update -y
-    sudo apt install apache2 -y
-    sudo apt install postgresql-client -y
-    sudo apt install php libapache2-mod-php php-pgsql -y
-    sudo apt install curl php-cli php-mbstring unzip -y
+    if ! systemctl list-units --type=service --state=running | grep -q 'apache2.service'; then
+        echo "Apache2 not found. Performing initial setup."
 
-    # Install Composer
-    curl -sS https://getcomposer.org/installer | php
-    sudo mv composer.phar /usr/local/bin/composer
+        sudo apt update -y
+        sudo apt install apache2 -y
+        sudo apt install postgresql-client -y
+        sudo apt install php libapache2-mod-php php-pgsql -y
+        sudo apt install curl php-cli php-mbstring unzip -y
 
-    cd /home/adminuser
-    rm -rf *
-    git clone https://github.com/Ganesh-DevOps-Eng/php-postgres.git
-    cd php-postgres/
+        # Install Composer
+        curl -sS https://getcomposer.org/installer | php
+        sudo mv composer.phar /usr/local/bin/composer
 
-    # Import database
-    PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql
+        cd /home/adminuser
+        rm -rf *
+        git clone https://github.com/Ganesh-DevOps-Eng/php-postgres.git
+        cd php-postgres/
 
-    # Configure Apache
-    echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess
-    echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess
-    sudo chown www-data:www-data /var/www/html/*
-    sudo chmod 644 /var/www/html/*
+        # Import database
+        PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql
 
-    # Update Apache configuration to allow overrides
-    sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
-    <Directory /var/www/html>
-        Options Indexes FollowSymLinks
-        AllowOverride All
-        Require all granted
-    </Directory>
-    EOT'
+        # Configure Apache
+        echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess
+        echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess
 
-    # Mark setup as completed (create a file to indicate setup has been done)
-    sudo touch /home/adminuser/.setup_done
+        # Update Apache configuration to allow overrides
+        sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
+        <Directory /var/www/html>
+            Options Indexes FollowSymLinks
+            AllowOverride All
+            Require all granted
+        </Directory>
+        EOT'
+
+        # Mark setup as completed (create a file to indicate setup has been done)
+        sudo touch /home/adminuser/.setup_done
+    else
+        echo "Apache2 is already installed. Skipping initial setup."
+    fi
   displayName: 'Initial Setup (Run Once)'
-  condition: and(succeeded(), not(contains(variables['Build.SourceBranch'], 'refs/heads/main')))
 
 # Code deployment (Run on every commit)
 - script: |
-    cd /home/adminuser/php-postgres/
-    git pull origin main
-    sudo chown -R www-data:www-data /var/www/html/*
-    sudo chmod 644 /var/www/html/*
+    if [ -d "/home/adminuser/php-postgres" ]; then
+        cd /home/adminuser/php-postgres/
+        git pull origin main
+    else
+        echo "Repository directory does not exist. Skipping git pull."
+    fi
+
+    if [ -d "/var/www/html" ]; then
+        sudo chown -R www-data:www-data /var/www/html/*
+        sudo chmod 644 /var/www/html/*
+    else
+        echo "Directory /var/www/html does not exist. Skipping permissions update."
+    fi
 
     # Install Composer dependencies
-    yes | sudo composer require vlucas/phpdotenv
-    yes | sudo composer install
+    if command -v composer &> /dev/null; then
+        yes | sudo composer require vlucas/phpdotenv
+        yes | sudo composer install
+    else
+        echo "Composer not found. Skipping dependency installation."
+    fi
 
     # Restart Apache
-    sudo systemctl restart apache2
+    if systemctl list-units --type=service --state=running | grep -q 'apache2.service'; then
+        sudo systemctl restart apache2
+    else
+        echo "Apache service not found. Skipping restart."
+    fi
   displayName: 'Deploy to VM'
