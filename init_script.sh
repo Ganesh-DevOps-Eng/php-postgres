@@ -22,7 +22,7 @@ fi
 
 # Create a symbolic link
 if [ ! -L /var/www/html ]; then
-  sudo ln -s /home/adminuser/project /var/www/html/ || true
+  sudo ln -s /home/adminuser/project/ /var/www/html/ || true
 else
   echo "Symbolic link already exists."
 fi
