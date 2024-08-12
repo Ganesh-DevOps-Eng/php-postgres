@@ -9,38 +9,41 @@ pool:
 # Initial setup (Run once)
 steps:
 - script: |
-    sudo apt update -y
-    sudo apt install apache2 -y
-    sudo apt install postgresql-client -y
-    sudo apt install php libapache2-mod-php php-pgsql -y
-    sudo apt install curl php-cli php-mbstring unzip -y
+    if [ ! -f /home/adminuser/.setup_done ]; then
+      sudo apt update -y
+      sudo apt install apache2 -y
+      sudo apt install postgresql-client -y
+      sudo apt install php libapache2-mod-php php-pgsql -y
+      sudo apt install curl php-cli php-mbstring unzip -y
 
-    # Install Composer
-    curl -sS https://getcomposer.org/installer | php
-    sudo mv composer.phar /usr/local/bin/composer
+      # Install Composer
+      curl -sS https://getcomposer.org/installer | php
+      sudo mv composer.phar /usr/local/bin/composer
 
-    # Import database
-    PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql
+      # Import database
+      PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql
 
-    # Configure Apache
-    echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess
-    echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess
-    sudo chown www-data:www-data /var/www/html/*
-    sudo chmod 644 /var/www/html/*
+      # Configure Apache
+      echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess
+      echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess
+      sudo chown www-data:www-data /var/www/html/*
+      sudo chmod 644 /var/www/html/*
 
-    # Update Apache configuration to allow overrides
-    sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
-    <Directory /var/www/html>
-        Options Indexes FollowSymLinks
-        AllowOverride All
-        Require all granted
-    </Directory>
-    EOT'
+      # Update Apache configuration to allow overrides
+      sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
+      <Directory /var/www/html>
+          Options Indexes FollowSymLinks
+          AllowOverride All
+          Require all granted
+      </Directory>
+      EOT'
 
-    # Mark setup as completed (create a file to indicate setup has been done)
-    sudo touch /home/adminuser/.setup_done
+      # Mark setup as completed (create a file to indicate setup has been done)
+      sudo touch /home/adminuser/.setup_done
+    else
+      echo "Setup already completed. Skipping initial setup."
+    fi
   displayName: 'Initial Setup (Run Once)'
-  condition: and(succeeded(), not(exists('/home/adminuser/.setup_done')))  # Updated condition
 
 # Code deployment (Run on every commit)
 - script: |
