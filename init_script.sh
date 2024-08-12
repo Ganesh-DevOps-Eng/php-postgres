@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e  # Exit immediately if a command exits with a non-zero status
+
 # Update and install packages
 sudo apt update -y
 sudo apt install apache2 -y
@@ -16,19 +18,27 @@ mkdir -p /home/adminuser/project
 cd /home/adminuser/project
 git init
 git pull https://github.com/Ganesh-DevOps-Eng/php-postgres.git
-cd php-postgres/
 
-# Import database
-PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql
 
-# Move files to web root
-mv * /var/www/html
+# Import database if it doesn't already exist
+DB_EXISTS=$(PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='mydb'")
+if [ -z "$DB_EXISTS" ]; then
+  echo "Database does not exist. Restoring..."
+  PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql
+else
+  echo "Database already exists. Skipping restore."
+fi
+
+sudo ln -s /home/adminuser/project /var/www/html/
 
 # Configure Apache
 echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess
 echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess
-sudo chown www-data:www-data /var/www/html/*
-sudo chmod 644 /var/www/html/*
+
+# Set proper permissions
+sudo chown -R www-data:www-data /home/adminuser/project/
+sudo chmod -R 755 /home/adminuser/project/
+sudo chmod 644 /home/adminuser/project/.env
 
 # Update Apache configuration to allow overrides
 sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
@@ -37,7 +47,7 @@ sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
     AllowOverride All
     Require all granted
 </Directory>'
-
+  
 # Install Composer dependencies
 yes | sudo composer require vlucas/phpdotenv
 yes | sudo composer install
