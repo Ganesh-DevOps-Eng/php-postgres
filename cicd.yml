@@ -9,14 +9,7 @@ pool:
 # Initial setup (Run once if Apache2 is not installed)
 steps:
 - script: |
-    cd /home/adminuser/project/
-    git pull origin main
-    sudo chown -R www-data:www-data /home/adminuser/project/*
-    sudo chmod -R 755 /home/adminuser/project/*
 
-    # Install Composer dependencies
-    yes | sudo composer require vlucas/phpdotenv
-    yes | sudo composer install
 
     # Restart Apache 
     sudo systemctl restart apache2
