@@ -9,7 +9,7 @@ sudo apt install composer -y || true
 # Clone the repository and setup application
 git clone https://github.com/Ganesh-DevOps-Eng/php-postgres.git || true
 # Create a symbolic link
-sudo ln -s /home/adminuser/php-postgres /var/www/html
+sudo cp -R /home/adminuser/php-postgres /var/www/html
 # Configure Apache
 echo "RewriteEngine On" | sudo tee -a /var/www/html/php-postgres/.htaccess || true
 echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/php-postgres/.htaccess || true
