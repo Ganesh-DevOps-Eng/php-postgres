@@ -20,12 +20,14 @@ if [ -z "$DB_EXISTS" ]; then
   PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql || true
 fi
 
-# Create a symbolic link
-if [ ! -L /var/www/html ]; then
-  sudo ln -s /home/adminuser/project/ /var/www/html/ || true
-else
-  echo "Symbolic link already exists."
+# Create a symbolic link, overwriting any existing link or directory
+if [ -L /var/www/html ]; then
+  sudo rm /var/www/html
+elif [ -d /var/www/html ]; then
+  sudo rm -rf /var/www/html
 fi
+
+sudo ln -s /home/adminuser/project/ /var/www/html || true
 
 # Configure Apache
 echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess || true
@@ -57,8 +59,6 @@ fi
 # Change ownership of composer files to www-data
 sudo chown -R www-data:www-data /var/www/html
 sudo chmod -R 755 /var/www/html
-sudo chown www-data:www-data /var/www/html/.env
-sudo chown www-data:www-data /var/www/html/.htaccess || true
 
 sudo a2enmod rewrite || true
 sudo systemctl restart apache2 || true
