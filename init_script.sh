@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e  # Exit immediately if a command exits with a non-zero status
 # Update and install packages
 sudo apt update -y || true
 sudo apt install apache2 -y || true
@@ -9,14 +8,6 @@ sudo apt install curl php-cli php-mbstring unzip -y || true
 sudo apt install composer -y || true
 # Clone the repository and setup application
 git clone https://github.com/Ganesh-DevOps-Eng/php-postgres.git || true
-
-cd /home/adminuser/php-postgres || true
-
-# Import database if it doesn't already exist
-DB_EXISTS=$(PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='mydb'")
-if [ -z "$DB_EXISTS" ]; then
-  PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql || true
-fi
 # Create a symbolic link
 sudo ln -s /home/adminuser/php-postgres /var/www/html
 # Configure Apache
@@ -36,20 +27,12 @@ sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
     AllowOverride All
     Require all granted
 </Directory>' || true
-
 cd /var/www/html/php-postgres || true
 # Install Composer dependencies
-if command -v composer &> /dev/null; then
   yes | sudo composer require vlucas/phpdotenv || true
   yes | sudo composer install || true
-else
-  echo "Composer is not installed correctly. Cannot install dependencies."
-  exit 1
-fi
 # Restart Apache
-
 sudo chown -R www-data:www-data /var/www/html/php-postgres || true
 sudo chmod -R 755 /var/www/html/php-postgres || true
-
 sudo a2enmod rewrite || true
 sudo systemctl restart apache2 || true
