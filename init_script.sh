@@ -18,18 +18,15 @@ if [ -z "$DB_EXISTS" ]; then
   PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql || true
 fi
 # Create a symbolic link
-if [ ! -L /var/www/html ]; then
-  sudo ln -s /home/adminuser/php-postgres/ /var/www/html/ || true
-else
-  echo "Symbolic link already exists."
-fi
+sudo mv * /var/www/html/ || true
+sudo mv .env /var/www/html/ || true
 # Configure Apache
 echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess || true
 echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess || true
 # Set proper permissions
-sudo chown -R www-data:www-data /var/www/html/php-postgres/ || true
-sudo chmod -R 755 /var/www/html/php-postgres/ || true
-sudo chmod 644 /var/www/html/php-postgres/.env || true
+sudo chown -R www-data:www-data /var/www/html || true
+sudo chmod -R 755 /var/www/html || true
+sudo chmod 644 /var/www/html/.env || true
 sudo chmod 644 /var/www/html/.htaccess || true
 sudo rm -rf /var/www/html/index.html || true
 # Update Apache configuration to allow overrides
@@ -40,7 +37,7 @@ sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
     Require all granted
 </Directory>' || true
 
-cd /var/www/html/php-postgres/ || true
+cd /var/www/html/ || true
 # Install Composer dependencies
 if command -v composer &> /dev/null; then
   yes | sudo composer require vlucas/phpdotenv || true
@@ -50,5 +47,9 @@ else
   exit 1
 fi
 # Restart Apache
+
+sudo chown -R www-data:www-data /var/www/html || true
+sudo chmod -R 755 /var/www/html || true
+
 sudo a2enmod rewrite || true
 sudo systemctl restart apache2 || true
