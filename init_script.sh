@@ -34,8 +34,6 @@ echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess
 # Set proper permissions
 sudo chown -R www-data:www-data /home/adminuser/project/ || true
 sudo chmod -R 755 /home/adminuser/project/ || true
-sudo chmod 644 /home/adminuser/project/.env || true
-sudo chmod 644 /var/www/html/.htaccess || true
 sudo rm -rf /var/www/html/index.html || true
 # Update Apache configuration to allow overrides
 sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
@@ -54,11 +52,14 @@ else
   exit 1
 fi
 
-# Restart Apache
-sudo chown -R www-data:www-data /home/adminuser/project/vendor
+
 # Change ownership of composer files to www-data
-sudo chown www-data:www-data /home/adminuser/project/composer.json
-sudo chown www-data:www-data /home/adminuser/project/composer.lock
+sudo chown -R www-data:www-data /var/www/html
+sudo chmod -R 755 /var/www/html
+sudo chown www-data:www-data /var/www/html/.env
+sudo chown www-data:www-data /var/www/html/.htaccess || true
+sudo chmod 644 /home/adminuser/project/.env || true
+sudo chmod 644 /var/www/html/.htaccess || true
 
 sudo a2enmod rewrite || true
 sudo systemctl restart apache2 || true
