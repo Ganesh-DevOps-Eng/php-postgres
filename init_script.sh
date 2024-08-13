@@ -6,11 +6,10 @@ sudo apt install postgresql-client -y || true
 sudo apt install php libapache2-mod-php php-pgsql -y || true
 sudo apt install curl php-cli php-mbstring unzip -y || true
 sudo apt install composer -y || true
-mkdir -p /home/adminuser/porject
-/home/adminuser/porject
+mkdir -p /home/adminuser/project
+cd /home/adminuser/project
 # Clone the repository and setup application
 git clone https://github.com/Ganesh-DevOps-Eng/php-postgres.git || true
-# Create a symbolic link
 sudo cp -R php-postgres /var/www/html
 # Configure Apache
 echo "RewriteEngine On" | sudo tee -a /var/www/html/php-postgres/.htaccess || true
