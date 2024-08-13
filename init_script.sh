@@ -27,8 +27,11 @@ elif [ -d /var/www/html ]; then
   sudo rm -rf /var/www/html
 fi
 
-sudo ln -s /home/adminuser/project/* /var/www/html || true
-sudo ln -s /home/adminuser/project/.* /var/www/html || true
+#sudo ln -s /home/adminuser/project/* /var/www/html || true
+#sudo ln -s /home/adminuser/project/.* /var/www/html || true
+sudo cp -r /home/adminuser/project/* /var/www/html/ || true
+sudo cp -r /home/adminuser/project/.* /var/www/html/ || true
+
 
 # Configure Apache
 echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess || true
