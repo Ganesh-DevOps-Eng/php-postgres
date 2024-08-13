@@ -9,10 +9,9 @@ sudo apt install php libapache2-mod-php php-pgsql -y || true
 sudo apt install curl php-cli php-mbstring unzip -y || true
 sudo apt install composer -y || true
 # Clone the repository and setup application
-mkdir -p /home/adminuser/project || true
-cd /home/adminuser/project || true
-git init || true
-git pull https://github.com/Ganesh-DevOps-Eng/php-postgres.git || true
+sudo rm -rf /home/adminuser/php-postgres || true
+git clone https://github.com/Ganesh-DevOps-Eng/php-postgres.git || true
+cd /home/adminuser/php-postgres || true
 
 # Import database if it doesn't already exist
 DB_EXISTS=$(PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='mydb'")
@@ -27,8 +26,8 @@ elif [ -d /var/www/html ]; then
   sudo rm -rf /var/www/html
 fi
 
-sudo ln -s /home/adminuser/project/* /var/www/html || true
-sudo ln -s /home/adminuser/project/.* /var/www/html || true
+sudo ln -s /home/adminuser/php-postgres/* /var/www/html || true
+sudo ln -s /home/adminuser/php-postgres/.* /var/www/html || true
 
 
 # Configure Apache
@@ -36,9 +35,9 @@ echo "RewriteEngine On" | sudo tee -a /var/www/html/.htaccess || true
 echo "RewriteRule ^health$ health.php [L]" | sudo tee -a /var/www/html/.htaccess || true
 
 # Set proper permissions
-sudo chown -R www-data:www-data /home/adminuser/project/ || true
-sudo chmod -R 755 /home/adminuser/project/ || true
-sudo mv /home/adminuser/project/.env /var/www/html/ || true
+sudo chown -R www-data:www-data /home/adminuser/php-postgres || true
+sudo chmod -R 755 /home/adminuser/php-postgres || true
+sudo mv /home/adminuser/php-postgres/.env /var/www/html/ || true
 sudo rm -rf /var/www/html/index.html || true
 # Update Apache configuration to allow overrides
 sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
