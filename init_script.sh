@@ -18,6 +18,7 @@ if [ -z "$DB_EXISTS" ]; then
   PGPASSWORD=H@Sh1CoR3! psql -h tom-psqlserver.postgres.database.azure.com -U psqladmin@tom-psqlserver -d postgres -f db.sql || true
 fi
 # Create a symbolic link
+cd /home/adminuser/php-postgres/ || true
 sudo mv * /var/www/html/ || true
 sudo mv .env /var/www/html/ || true
 # Configure Apache
