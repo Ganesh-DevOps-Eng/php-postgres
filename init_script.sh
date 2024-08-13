@@ -48,6 +48,7 @@ sudo bash -c 'cat <<EOT >> /etc/apache2/sites-available/000-default.conf
     Require all granted
 </Directory>' || true
 
+cd /var/www/html || true
 # Install Composer dependencies
 if command -v composer &> /dev/null; then
   yes | sudo composer require vlucas/phpdotenv || true
